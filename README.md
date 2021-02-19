@@ -8,7 +8,9 @@
 
 ---------------------------------------------
 Стандартный пакет данных в режиме "Коды АЦП":
+
 Сообщение: GkvAdcData.msg
+
 Поля сообщения:
 std_msgs/Header header
 uint16 status
@@ -28,7 +30,9 @@ int16 temperature_adc_cpu
 
 ---------------------------------------------
 Стандартный пакет данных в режиме "Данные с датчиков":
+
 Сообщение: GkvSensorsData.msg
+
 Поля сообщения:
 std_msgs/Header header
 uint16 status
@@ -49,7 +53,9 @@ float32 temperature_cpu
 ---------------------------------------------
 Стандартный пакет данных в режимах "AHRS:Фильтр Калмана" и "AHRS:Фильтр Махони":
 Сообщение: GkvGyrovertData.msg
+
 Поля сообщения:
+
 std_msgs/Header header
 uint16 status
 uint16 sample_counter
@@ -62,7 +68,9 @@ float32 yaw
 ---------------------------------------------
 Стандартный пакет данных в режиме "Инклинометр":
 Сообщение: GkvInclinometerData.msg
+
 Поля сообщения:
+
 std_msgs/Header header
 uint16 status
 uint16 sample_counter
@@ -74,7 +82,9 @@ float32 beta
 ---------------------------------------------
 Стандартный пакет данных в режимах "БИНС","БИНС:ESKF+СНС" и"БИНС:ESKF5+СНС":
 Сообщение: GkvBINSData.msg
+
 Поля сообщения:
+
 std_msgs/Header header
 uint16 status
 uint16 sample_counter
@@ -96,7 +106,9 @@ float32 q0
 ---------------------------------------------
 Стандартный пакет данных ГНСС во всех режимах:
 Сообщение: GkvGpsData.msg
+
 Поля сообщения:
+
 std_msgs/Header header
 float32 time
 float32 latitude
@@ -115,7 +127,9 @@ float32 vertical_vel
 ---------------------------------------------
 Расширенный пакет данных ГНСС во всех режимах:
 Сообщение: GkvExtGpsData.msg
+
 Поля сообщения:
+
 std_msgs/Header header
 float32 lat_vel
 float32 lon_vel
@@ -132,7 +146,9 @@ uint16 num_ss
 ---------------------------------------------
 Наборный пакет данных во всех режимах:
 Сообщение: GkvCustomData.msg
+
 Поля сообщения:
+
 std_msgs/Header header
 uint8 quantity_of_params
 uint8[] numbers
