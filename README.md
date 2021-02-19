@@ -151,10 +151,10 @@
 
 Поля сообщения:
 
-std_msgs/Header header
-uint8 quantity_of_params
-uint8[] numbers
-float32[] param_values
+    std_msgs/Header header
+    uint8 quantity_of_params
+    uint8[] numbers
+    float32[] param_values
 
 Топик: gkv_custom_data
 
