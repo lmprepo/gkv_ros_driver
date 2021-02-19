@@ -1,0 +1,14 @@
+std_msgs/Header header
+uint16 status
+uint16 sample_counter
+float32 acceleration_x
+float32 acceleration_y
+float32 acceleration_z
+float32 angular_rate_x
+float32 angular_rate_y
+float32 angular_rate_z
+float32 temperature_x
+float32 temperature_y
+float32 temperature_z
+float32 temperature_cpu
+

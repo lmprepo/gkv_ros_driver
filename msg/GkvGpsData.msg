@@ -1,0 +1,12 @@
+std_msgs/Header header
+float32 time
+float32 latitude
+float32 longitude
+float32 altitude
+uint32 gps_state_status
+float32 TDOP
+float32 HDOP
+float32 VDOP
+float32 horizontal_vel
+float32 azimuth
+float32 vertical_vel

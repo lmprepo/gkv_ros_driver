@@ -1,0 +1,10 @@
+std_msgs/Header header
+float32 lat_vel
+float32 lon_vel
+float32 lat_std
+float32 lon_std
+float32 alt_std
+float32 lat_vel_std
+float32 lon_vel_std
+float32 alt_vel_std
+uint16 num_ss
