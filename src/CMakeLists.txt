@@ -11,3 +11,8 @@ add_executable(gkv_listener gkv_listener.cpp)
 target_link_libraries(gkv_listener 
 		PUBLIC ${catkin_LIBRARIES}
 		PRIVATE GKV_DevCommunicationLibrary)
+
+add_executable(gkv_alg_switcher gkv_alg_switcher.cpp)
+target_link_libraries(gkv_alg_switcher 
+		PUBLIC ${catkin_LIBRARIES}
+		PRIVATE GKV_DevCommunicationLibrary)

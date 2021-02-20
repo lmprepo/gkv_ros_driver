@@ -65,6 +65,7 @@ find_package(catkin REQUIRED COMPONENTS
   FILES
   GkvReset.srv
   GkvSetAlgorithm.srv
+  GkvGetID.srv
  )
 
 ## Generate actions in the 'action' folder

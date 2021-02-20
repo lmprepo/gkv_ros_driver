@@ -15,6 +15,8 @@
 
 using namespace std;
 
+uint8_t algorithm = GKV_ADC_CODES_ALGORITHM;
+
 void AdcCallback(const gkv_ros_driver::GkvAdcData::ConstPtr& msg);
 
 void SensorsCallback(const gkv_ros_driver::GkvSensorsData::ConstPtr& msg);
@@ -33,7 +35,7 @@ void CustomDataCallback(const gkv_ros_driver::GkvCustomData::ConstPtr& msg);
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "gkv_listener");
+  ros::init(argc, argv, "gkv_alg_switcher");
   ros::NodeHandle n;
   ros::AsyncSpinner spinner(0);
   spinner.start();
@@ -46,7 +48,44 @@ int main(int argc, char **argv)
   ros::Subscriber sub_gnss = n.subscribe("gkv_gnss_data", 1000, GNSSCallback);
   ros::Subscriber sub_ext_gnss = n.subscribe("gkv_ext_gnss_data", 1000, ExtGNSSCallback);
   ros::Subscriber sub_custom = n.subscribe("gkv_custom_data", 1000, CustomDataCallback);
-  ros::waitForShutdown();
+  // DEFINE CLIENT FOR RESET SERVICE
+  ros::ServiceClient reset_client = n.serviceClient<gkv_ros_driver::GkvReset>("gkv_reset_srv");
+  gkv_ros_driver::GkvReset reset_srv;
+   if (reset_client.call(reset_srv))
+   {
+         ROS_INFO("Reseted: %d", (int)reset_srv.response.result);
+   }
+   else
+   {
+        ROS_ERROR("Failed to reset device");
+   }
+   // DEFINE CLIENT FOR SET ALGORITHM
+   ros::ServiceClient set_alg_client = n.serviceClient<gkv_ros_driver::GkvSetAlgorithm>("gkv_set_alg_srv");
+   gkv_ros_driver::GkvSetAlgorithm set_alg_srv;
+   set_alg_srv.request.algorithm_number = algorithm;
+    if (set_alg_client.call(set_alg_srv))
+    {
+      ROS_INFO("Algortithm changed: %d", (int)set_alg_srv.response.result);
+    }
+    else
+    {
+      ROS_ERROR("Failed to set algorithm");
+    }
+    // DEFINE CLIENT FOR ID REQUEST
+    ros::ServiceClient get_id_client = n.serviceClient<gkv_ros_driver::GkvGetID>("gkv_get_id_srv");
+    gkv_ros_driver::GkvGetID get_id_srv;
+     if (get_id_client.call(get_id_srv))
+     {
+        ROS_INFO("Description: [%s]", (get_id_srv.response.dev_description.data).c_str());
+        ROS_INFO("ID: [%s]", (get_id_srv.response.dev_id.data).c_str());
+     }
+     else
+     {
+          ROS_ERROR("Failed to get ID");
+          ROS_INFO("Description: [%s]", (get_id_srv.response.dev_description.data).c_str());
+          ROS_INFO("ID: [%s]", (get_id_srv.response.dev_id.data).c_str());
+     }
+     ros::waitForShutdown();
   return 0;
 }
 
