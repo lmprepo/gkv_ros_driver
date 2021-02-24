@@ -43,7 +43,7 @@ bool GKV_DeviceROSWrapper::ResetDevice(gkv_ros_driver::GkvReset::Request  &req,
         }
         gkv_->ResetDevice();
         usleep(10000);
-//            ROS_INFO("Device Reset Req [%d]",i);
+ //           ROS_INFO("Device Reset Req [%d]",i);
     }
     res.result=(!(ResetRequestFlag));
     return res.result;
@@ -206,8 +206,8 @@ void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
             msg.lon_vel_std = packet->sig_vlon;
             msg.alt_vel_std = packet->sig_valt;
             msg.num_ss = packet->num_ss;
-            ROS_INFO("Extended GNSS Data: lat_vel=[%f] lon_vel=[%f] lat_std=[%f] lon_std=[%f] alt_std=[%f] lat_vel_std=[%f] lon_vel_std=[%f] alt_vel_std=[%f] num_ss=[%d]",
-                            packet->vlat, packet->vlon, packet->sig_lat, packet->sig_lon, packet->sig_alt, packet->sig_vlat, packet->sig_vlon, packet->sig_valt, packet->num_ss);
+//            ROS_INFO("Extended GNSS Data: lat_vel=[%f] lon_vel=[%f] lat_std=[%f] lon_std=[%f] alt_std=[%f] lat_vel_std=[%f] lon_vel_std=[%f] alt_vel_std=[%f] num_ss=[%d]",
+//                            packet->vlat, packet->vlon, packet->sig_lat, packet->sig_lon, packet->sig_alt, packet->sig_vlat, packet->sig_vlon, packet->sig_valt, packet->num_ss);
             received_ext_gnss_data_publisher.publish(msg);
             break;
         }
