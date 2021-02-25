@@ -55,7 +55,8 @@ GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string seri
     SetAlgorithmService = nh->advertiseService("gkv_set_alg_srv", &GKV_DeviceROSWrapper::SetAlgorithm,this);
     GetIDService = nh->advertiseService("gkv_get_id_srv", &GKV_DeviceROSWrapper::GetID,this);
     CheckConnectionService=nh->advertiseService("gkv_check_connection_srv", &GKV_DeviceROSWrapper::CheckConnection,this);
-    SetPacketTypeService=nh->advertiseService("gkv_set_packet_type_srv", &GKV_DeviceROSWrapper::SetPacketType,this);;
+    SetPacketTypeService=nh->advertiseService("gkv_set_packet_type_srv", &GKV_DeviceROSWrapper::SetPacketType,this);
+    SetCustomParametersService=nh->advertiseService("gkv_set_custom_params_srv", &GKV_DeviceROSWrapper::SetCustomParams,this);
 
     memset(&(device_id),0,sizeof(device_id));
     memcpy(&(device_id.serial_id),&NoDevStr,sizeof(NoDevStr));
@@ -139,6 +140,63 @@ bool GKV_DeviceROSWrapper::SetPacketType(gkv_ros_driver::GkvSetPacketType::Reque
     res.result=(!(SetPacketTypeRequestFlag));
     return res.result;
 }
+
+
+//SET DEVICE CUSTOM PARAMS FUNCTION
+bool GKV_DeviceROSWrapper::SetCustomParams(gkv_ros_driver::GkvSetCustomParameters::Request  &req,
+                 gkv_ros_driver::GkvSetCustomParameters::Response &res)
+{
+    //check for maximum quantity of parameters
+    if ((req.quantity_of_params>custom_params_limit))
+    {
+        return false;
+    }
+    //check for selected quantity of parameters is identical to array size
+    if (!(req.quantity_of_params==req.params.size()))
+    {
+      return false;
+    }
+    //check for maximum number of custom gkv parameter
+    for (uint8_t j=0;j<req.params.size();j++)
+    {
+        if (req.params[j]>max_number_of_custom_parameter) return false;
+    }
+    //prepare for request
+    SetCustomParametersRequestFlag=true;
+    //create buffer structure of parameter numbers packet
+    Gyrovert::GKV_CustomDataParam required_custom_parameters;
+    memset(&required_custom_parameters,0,sizeof(required_custom_parameters));
+    //set buffer structure quantity
+    required_custom_parameters.num=req.quantity_of_params;
+    //set buffer structure numbers
+    for (uint8_t k=0;k<req.quantity_of_params;k++)
+    {
+        required_custom_parameters.param[k]=req.params[k];
+    }
+    //send parameters packet
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+        if (SetCustomParametersRequestFlag==false)
+        {
+            break;
+        }
+        ROS_INFO("Device Custom Parameters Number [%d]",required_custom_parameters.num);
+        for (uint8_t m=0;m<req.quantity_of_params;m++)
+        {
+          ROS_INFO("Device Custom Parameter [%d]",required_custom_parameters.param[m]);
+        }
+        gkv_->SetCustomPacketParam(&(required_custom_parameters.param[0]), required_custom_parameters.num);
+        usleep(10000);
+    }
+    res.result=(!(SetCustomParametersRequestFlag));
+    //if parameters written correctly set current device parameters to required
+    if (res.result==true)
+    {
+        memcpy(&device_custom_parameters,&required_custom_parameters,sizeof(required_custom_parameters));
+    }
+    return res.result;
+}
+
 
 //GET DEVICE ID FUNCTION
 bool GKV_DeviceROSWrapper::GetID(gkv_ros_driver::GkvGetID::Request  &req,
@@ -372,7 +430,12 @@ void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
             if (SetPacketTypeRequestFlag)
             {
                 SetPacketTypeRequestFlag=false;
-//                    ROS_INFO("Algorithm changed");
+//                    ROS_INFO("Packet Type changed");
+            }
+            if (SetCustomParametersRequestFlag)
+            {
+                SetCustomParametersRequestFlag=false;
+//                    ROS_INFO("Custom parameters set");
             }
             break;
         }

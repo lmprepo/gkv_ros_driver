@@ -13,11 +13,12 @@
 #include <gkv_ros_driver/GkvSetAlgorithm.h>
 #include <gkv_ros_driver/GkvGetID.h>
 #include <gkv_ros_driver/GkvSetPacketType.h>
+#include <gkv_ros_driver/GkvSetCustomParameters.h>
 #include <GKV_Device.h>
 
 using namespace std;
 
-uint8_t algorithm = GKV_ADC_CODES_ALGORITHM;
+uint8_t algorithm = GKV_ORIENTATION_KALMAN_ALGORITHM;
 
 void AdcCallback(const gkv_ros_driver::GkvAdcData::ConstPtr& msg);
 

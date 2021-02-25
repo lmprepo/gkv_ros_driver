@@ -53,6 +53,7 @@
 #include <gkv_ros_driver/GkvGetID.h>
 #include <gkv_ros_driver/GkvCheckConnection.h>
 #include <gkv_ros_driver/GkvSetPacketType.h>
+#include <gkv_ros_driver/GkvSetCustomParameters.h>
 
 #include "std_msgs/String.h"
 //using namespace ;
@@ -75,12 +76,15 @@ private:
     ros::ServiceServer GetIDService;
     ros::ServiceServer CheckConnectionService;
     ros::ServiceServer SetPacketTypeService;
-    ros::ServiceServer SetCustomPacketParametersService;
+    ros::ServiceServer SetCustomParametersService;
     ros::ServiceServer GetDeviceSettingsService;
 
 
     uint8_t GKV_Status=0;
     uint16_t request_limit=100;
+    uint8_t custom_params_limit=64;
+    uint8_t max_number_of_custom_parameter=109;
+
     bool ResetRequestFlag=false;
     bool SetAlgRequestFlag=false;
     bool CustomParamNumbersRequestFlag=false;
@@ -90,6 +94,8 @@ private:
     bool RequestDevIDFlag=false;
     bool CheckConnectionRequestFlag=false;
     bool SetPacketTypeRequestFlag=false;
+    bool SetCustomParametersRequestFlag=false;
+
 
 
     const char* NoDevStr = "NoDeviceFound";
@@ -110,6 +116,9 @@ public:
     //SET DEVICE PACKET TYPE FUNCTION
     bool SetPacketType(gkv_ros_driver::GkvSetPacketType::Request  &req,
                      gkv_ros_driver::GkvSetPacketType::Response &res);
+    //SET DEVICE CUSTOM PARAMS FUNCTION
+    bool SetCustomParams(gkv_ros_driver::GkvSetCustomParameters::Request  &req,
+                     gkv_ros_driver::GkvSetCustomParameters::Response &res);
     //CHECK CONNECTION STATUS FUNCTION
     bool IsConnected()
     {

@@ -336,12 +336,12 @@ namespace Gyrovert
       */
     void LMP_Device::SetCustomPacketParam(uint8_t* param_array_ptr, uint8_t quantity_of_params)
     {
-        GKV_CustomDataParam GKV_CustomDataParam;
-        memset(&GKV_CustomDataParam, 0, sizeof(GKV_CustomDataParam));
+        GKV_CustomDataParam GKV_CustomDataParameters;
+        memset(&GKV_CustomDataParameters, 0, sizeof(GKV_CustomDataParameters));
         uint8_t type = GKV_CUSTOM_DATA_PARAM_PACKET;
-        GKV_CustomDataParam.num = quantity_of_params;
-        memcpy(&(GKV_CustomDataParam.param), &param_array_ptr, quantity_of_params);
-        Configure_Output_Packet(type, &GKV_CustomDataParam, sizeof(GKV_CustomDataParam));
+        GKV_CustomDataParameters.num = quantity_of_params;
+        memcpy(&(GKV_CustomDataParameters.param[0]),param_array_ptr, quantity_of_params);
+        Configure_Output_Packet(type, &GKV_CustomDataParameters, sizeof(GKV_CustomDataParameters));
         Send_Data();
     }
 

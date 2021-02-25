@@ -287,11 +287,13 @@ typedef struct __GKV_AllParameters
 /** 
   * @brief  Packet 0x27 with list of parameters of custom packet (send/receive) 
   */
+#pragma pack(push, 1)
 typedef struct __GKV_CustomDataParam
 {
 	uint8_t num;                            /*	number of parameters that device sends in custom packet	*/
 	uint8_t param[63];                      /*	type of parameter N from list of 'custom_data_parameters'	*/
 }GKV_CustomDataParam;
+#pragma pack(pop)
 
 
 
