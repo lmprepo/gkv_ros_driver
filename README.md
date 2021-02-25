@@ -194,6 +194,16 @@
   
   Ответ: результат, поле result, значения "true/false"
 
+
+Установка типа пакета: gkv_set_packet_type_srv
+
+  Запрос: номер алгоритма, поле "packet_type", значения:
+  
+    GKV_SET_DEFAULT_ALGORITHM_PACKET = 0 - Стандартный пакет для выбранного алгоритма
+    GKV_SET_CUSTOM_PACKET = 1 - Наборный пакет данных
+  
+  Ответ: результат, поле result, значения "true/false"
+
 Запрос ID: gkv_get_id_srv.
 
   Запрос: без заполнения полей. 
