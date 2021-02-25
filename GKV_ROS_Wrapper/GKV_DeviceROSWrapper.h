@@ -51,6 +51,7 @@
 #include <gkv_ros_driver/GkvReset.h>
 #include <gkv_ros_driver/GkvSetAlgorithm.h>
 #include <gkv_ros_driver/GkvGetID.h>
+#include <gkv_ros_driver/GkvCheckConnection.h>
 #include "std_msgs/String.h"
 //using namespace ;
 
@@ -70,6 +71,8 @@ private:
     ros::ServiceServer ResetService;
     ros::ServiceServer SetAlgorithmService;
     ros::ServiceServer GetIDService;
+    ros::ServiceServer CheckConnectionService;
+
 
     uint8_t GKV_Status=0;
     uint16_t request_limit=100;
@@ -80,6 +83,8 @@ private:
     bool CustomParamNumbersReceived=false;
     Gyrovert::GKV_ID device_id;
     bool RequestDevIDFlag=false;
+    bool CheckConnectionRequestFlag=false;
+
     const char* NoDevStr = "NoDeviceFound";
 public:
     GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string serial_port, uint32_t baudrate);
@@ -92,6 +97,9 @@ public:
     //GET DEVICE ID FUNCTION
     bool GetID(gkv_ros_driver::GkvGetID::Request  &req,
                gkv_ros_driver::GkvGetID::Response &res);
+    //Check DEVICE Connection FUNCTION
+    bool CheckConnection(gkv_ros_driver::GkvCheckConnection::Request  &req,
+                        gkv_ros_driver::GkvCheckConnection::Response &res);
     //CHECK CONNECTION STATUS FUNCTION
     bool IsConnected()
     {

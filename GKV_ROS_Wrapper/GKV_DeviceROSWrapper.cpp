@@ -54,7 +54,7 @@ GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string seri
     ResetService = nh->advertiseService("gkv_reset_srv", &GKV_DeviceROSWrapper::ResetDevice,this);
     SetAlgorithmService = nh->advertiseService("gkv_set_alg_srv", &GKV_DeviceROSWrapper::SetAlgorithm,this);
     GetIDService = nh->advertiseService("gkv_get_id_srv", &GKV_DeviceROSWrapper::GetID,this);
-
+    CheckConnectionService=nh->advertiseService("gkv_check_connection_srv", &GKV_DeviceROSWrapper::CheckConnection,this);
     memset(&(device_id),0,sizeof(device_id));
     memcpy(&(device_id.serial_id),&NoDevStr,sizeof(NoDevStr));
     memcpy(&(device_id.description),&NoDevStr,sizeof(NoDevStr));
@@ -133,6 +133,32 @@ bool GKV_DeviceROSWrapper::GetID(gkv_ros_driver::GkvGetID::Request  &req,
        RequestDevIDFlag==false;
        return false;
     }
+}
+
+//GET DEVICE ID FUNCTION
+bool GKV_DeviceROSWrapper::CheckConnection(gkv_ros_driver::GkvCheckConnection::Request  &req,
+           gkv_ros_driver::GkvCheckConnection::Response &res)
+{
+  if (!(IsConnected()))
+  {
+    return false;
+  }
+  else {
+    CheckConnectionRequestFlag=true;
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+        if (CheckConnectionRequestFlag==false)
+        {
+            break;
+        }
+        gkv_->CheckConnection();
+        usleep(10000);
+      ROS_INFO("Device Check Req [%d]",i);
+    }
+    res.result=(!(CheckConnectionRequestFlag));
+    return res.result;
+  }
+
 }
 
 void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
@@ -297,6 +323,10 @@ void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
         }
         case GKV_CONFIRM_PACKET:
         {
+            if (CheckConnectionRequestFlag)
+            {
+              CheckConnectionRequestFlag=false;
+            }
             if (ResetRequestFlag)
             {
                 ResetRequestFlag=false;

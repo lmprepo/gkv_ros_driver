@@ -8,6 +8,7 @@
 #include <gkv_ros_driver/GkvGpsData.h>
 #include <gkv_ros_driver/GkvExtGpsData.h>
 #include <gkv_ros_driver/GkvCustomData.h>
+#include <gkv_ros_driver/GkvCheckConnection.h>
 #include <gkv_ros_driver/GkvReset.h>
 #include <gkv_ros_driver/GkvSetAlgorithm.h>
 #include <gkv_ros_driver/GkvGetID.h>
@@ -48,6 +49,18 @@ int main(int argc, char **argv)
   ros::Subscriber sub_gnss = n.subscribe("gkv_gnss_data", 1000, GNSSCallback);
   ros::Subscriber sub_ext_gnss = n.subscribe("gkv_ext_gnss_data", 1000, ExtGNSSCallback);
   ros::Subscriber sub_custom = n.subscribe("gkv_custom_data", 1000, CustomDataCallback);
+  // DEFINE CLIENT FOR CHECK CONNECTION SERVICE
+  ros::ServiceClient check_connection_client = n.serviceClient<gkv_ros_driver::GkvCheckConnection>("gkv_check_connection_srv");
+  gkv_ros_driver::GkvReset check_connection_srv;
+   if (check_connection_client.call(check_connection_srv))
+   {
+         ROS_INFO("Connection state: %d", (int)check_connection_srv.response.result);
+   }
+   else
+   {
+         ROS_ERROR("Connection state: %d", (int)check_connection_srv.response.result);
+         return 1;
+   }
   // DEFINE CLIENT FOR RESET SERVICE
   ros::ServiceClient reset_client = n.serviceClient<gkv_ros_driver::GkvReset>("gkv_reset_srv");
   gkv_ros_driver::GkvReset reset_srv;
