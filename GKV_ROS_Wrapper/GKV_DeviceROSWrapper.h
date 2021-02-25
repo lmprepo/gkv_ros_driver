@@ -52,6 +52,8 @@
 #include <gkv_ros_driver/GkvSetAlgorithm.h>
 #include <gkv_ros_driver/GkvGetID.h>
 #include <gkv_ros_driver/GkvCheckConnection.h>
+#include <gkv_ros_driver/GkvSetPacketType.h>
+
 #include "std_msgs/String.h"
 //using namespace ;
 
@@ -72,6 +74,9 @@ private:
     ros::ServiceServer SetAlgorithmService;
     ros::ServiceServer GetIDService;
     ros::ServiceServer CheckConnectionService;
+    ros::ServiceServer SetPacketTypeService;
+    ros::ServiceServer SetCustomPacketParametersService;
+    ros::ServiceServer GetDeviceSettingsService;
 
 
     uint8_t GKV_Status=0;
@@ -84,6 +89,8 @@ private:
     Gyrovert::GKV_ID device_id;
     bool RequestDevIDFlag=false;
     bool CheckConnectionRequestFlag=false;
+    bool SetPacketTypeRequestFlag=false;
+
 
     const char* NoDevStr = "NoDeviceFound";
 public:
@@ -100,6 +107,9 @@ public:
     //Check DEVICE Connection FUNCTION
     bool CheckConnection(gkv_ros_driver::GkvCheckConnection::Request  &req,
                         gkv_ros_driver::GkvCheckConnection::Response &res);
+    //SET DEVICE PACKET TYPE FUNCTION
+    bool SetPacketType(gkv_ros_driver::GkvSetPacketType::Request  &req,
+                     gkv_ros_driver::GkvSetPacketType::Response &res);
     //CHECK CONNECTION STATUS FUNCTION
     bool IsConnected()
     {

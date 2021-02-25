@@ -42,6 +42,9 @@
 #include <LMP_Device.h>
 namespace Gyrovert
 {
+#define GKV_SET_DEFAULT_ALGORITHM_PACKET 0
+#define GKV_SET_CUSTOM_PACKET 1
+
 // windows class for GKV serial port comm
 #ifdef _WIN32
 #include <windows.h>

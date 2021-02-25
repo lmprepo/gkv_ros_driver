@@ -12,6 +12,7 @@
 #include <gkv_ros_driver/GkvReset.h>
 #include <gkv_ros_driver/GkvSetAlgorithm.h>
 #include <gkv_ros_driver/GkvGetID.h>
+#include <gkv_ros_driver/GkvSetPacketType.h>
 #include <GKV_Device.h>
 
 using namespace std;
@@ -49,9 +50,10 @@ int main(int argc, char **argv)
   ros::Subscriber sub_gnss = n.subscribe("gkv_gnss_data", 1000, GNSSCallback);
   ros::Subscriber sub_ext_gnss = n.subscribe("gkv_ext_gnss_data", 1000, ExtGNSSCallback);
   ros::Subscriber sub_custom = n.subscribe("gkv_custom_data", 1000, CustomDataCallback);
+
   // DEFINE CLIENT FOR CHECK CONNECTION SERVICE
   ros::ServiceClient check_connection_client = n.serviceClient<gkv_ros_driver::GkvCheckConnection>("gkv_check_connection_srv");
-  gkv_ros_driver::GkvReset check_connection_srv;
+  gkv_ros_driver::GkvCheckConnection check_connection_srv;
    if (check_connection_client.call(check_connection_srv))
    {
          ROS_INFO("Connection state: %d", (int)check_connection_srv.response.result);
@@ -61,6 +63,7 @@ int main(int argc, char **argv)
          ROS_ERROR("Connection state: %d", (int)check_connection_srv.response.result);
          return 1;
    }
+
   // DEFINE CLIENT FOR RESET SERVICE
   ros::ServiceClient reset_client = n.serviceClient<gkv_ros_driver::GkvReset>("gkv_reset_srv");
   gkv_ros_driver::GkvReset reset_srv;
@@ -72,7 +75,8 @@ int main(int argc, char **argv)
    {
         ROS_ERROR("Failed to reset device");
    }
-   // DEFINE CLIENT FOR SET ALGORITHM
+
+   // DEFINE CLIENT FOR ALGORITHM SETTING
    ros::ServiceClient set_alg_client = n.serviceClient<gkv_ros_driver::GkvSetAlgorithm>("gkv_set_alg_srv");
    gkv_ros_driver::GkvSetAlgorithm set_alg_srv;
    set_alg_srv.request.algorithm_number = algorithm;
@@ -84,6 +88,20 @@ int main(int argc, char **argv)
     {
       ROS_ERROR("Failed to set algorithm");
     }
+
+    // DEFINE CLIENT FOR PACKET TYPE SETTING
+    ros::ServiceClient set_packet_type_client = n.serviceClient<gkv_ros_driver::GkvSetPacketType>("gkv_set_packet_type_srv");
+    gkv_ros_driver::GkvSetPacketType set_packet_type_srv;
+    set_packet_type_srv.request.packet_type = GKV_SET_DEFAULT_ALGORITHM_PACKET;
+     if (set_packet_type_client.call(set_packet_type_srv))
+     {
+       ROS_INFO("Packet type changed: %d", (int)set_packet_type_srv.response.result);
+     }
+     else
+     {
+       ROS_ERROR("Failed to set packet type");
+     }
+
     // DEFINE CLIENT FOR ID REQUEST
     ros::ServiceClient get_id_client = n.serviceClient<gkv_ros_driver::GkvGetID>("gkv_get_id_srv");
     gkv_ros_driver::GkvGetID get_id_srv;

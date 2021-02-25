@@ -55,6 +55,8 @@ GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string seri
     SetAlgorithmService = nh->advertiseService("gkv_set_alg_srv", &GKV_DeviceROSWrapper::SetAlgorithm,this);
     GetIDService = nh->advertiseService("gkv_get_id_srv", &GKV_DeviceROSWrapper::GetID,this);
     CheckConnectionService=nh->advertiseService("gkv_check_connection_srv", &GKV_DeviceROSWrapper::CheckConnection,this);
+    SetPacketTypeService=nh->advertiseService("gkv_set_packet_type_srv", &GKV_DeviceROSWrapper::SetPacketType,this);;
+
     memset(&(device_id),0,sizeof(device_id));
     memcpy(&(device_id.serial_id),&NoDevStr,sizeof(NoDevStr));
     memcpy(&(device_id.description),&NoDevStr,sizeof(NoDevStr));
@@ -108,6 +110,36 @@ bool GKV_DeviceROSWrapper::SetAlgorithm(gkv_ros_driver::GkvSetAlgorithm::Request
     return res.result;
 }
 
+//SET DEVICE PACKET TYPE FUNCTION
+bool GKV_DeviceROSWrapper::SetPacketType(gkv_ros_driver::GkvSetPacketType::Request  &req,
+                 gkv_ros_driver::GkvSetPacketType::Response &res)
+{
+    if ((!(req.packet_type==GKV_SET_DEFAULT_ALGORITHM_PACKET))&&(!(req.packet_type==GKV_SET_CUSTOM_PACKET)))
+    {
+        return false;
+    }
+    SetPacketTypeRequestFlag=true;
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+
+        if (SetPacketTypeRequestFlag==false)
+        {
+            break;
+        }
+        if (req.packet_type==0)
+        {
+          gkv_->SetDefaultAlgorithmPacket();
+        }
+        else {
+          gkv_->SetCustomAlgorithmPacket();
+        }
+        usleep(10000);
+//            ROS_INFO("Device Set Packet Type Req [%d]",i);
+    }
+    res.result=(!(SetPacketTypeRequestFlag));
+    return res.result;
+}
+
 //GET DEVICE ID FUNCTION
 bool GKV_DeviceROSWrapper::GetID(gkv_ros_driver::GkvGetID::Request  &req,
            gkv_ros_driver::GkvGetID::Response &res)
@@ -153,7 +185,7 @@ bool GKV_DeviceROSWrapper::CheckConnection(gkv_ros_driver::GkvCheckConnection::R
         }
         gkv_->CheckConnection();
         usleep(10000);
-      ROS_INFO("Device Check Req [%d]",i);
+//      ROS_INFO("Device Check Req [%d]",i);
     }
     res.result=(!(CheckConnectionRequestFlag));
     return res.result;
@@ -335,6 +367,11 @@ void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
             if (SetAlgRequestFlag)
             {
                 SetAlgRequestFlag=false;
+//                    ROS_INFO("Algorithm changed");
+            }
+            if (SetPacketTypeRequestFlag)
+            {
+                SetPacketTypeRequestFlag=false;
 //                    ROS_INFO("Algorithm changed");
             }
             break;
