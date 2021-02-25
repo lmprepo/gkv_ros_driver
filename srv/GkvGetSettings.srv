@@ -1,0 +1,20 @@
+---
+std_msgs/String acceleration_unit
+std_msgs/String angular_rate_unit
+std_msgs/String angle_unit
+std_msgs/String coordinates_order
+bool x_axis_inverted
+bool y_axis_inverted
+bool z_axis_inverted
+std_msgs/String sync_signal_type
+std_msgs/String packet_type
+uint8_t adc_data_freq_khz
+std_msgs/String send_sync_by
+std_msgs/String yaw_range
+bool changeable_custom_packet_length
+uint32 baudrate
+uint8 device_address
+uint32 data_freq
+float32[] dcm
+uint32 data_prescaler
+uint32 skip_packets
