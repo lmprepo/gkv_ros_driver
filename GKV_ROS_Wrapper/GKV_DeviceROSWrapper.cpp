@@ -114,7 +114,7 @@ bool GKV_DeviceROSWrapper::SetAlgorithm(gkv_ros_driver::GkvSetAlgorithm::Request
 bool GKV_DeviceROSWrapper::SetPacketType(gkv_ros_driver::GkvSetPacketType::Request  &req,
                  gkv_ros_driver::GkvSetPacketType::Response &res)
 {
-    if ((!(req.packet_type==GKV_SET_DEFAULT_ALGORITHM_PACKET))&&(!(req.packet_type==GKV_SET_CUSTOM_PACKET)))
+    if ((!(req.packet_type==GKV_SELECT_DEFAULT_ALGORITHM_PACKET))&&(!(req.packet_type==GKV_SELECT_CUSTOM_PACKET)))
     {
         return false;
     }

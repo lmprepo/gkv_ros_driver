@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     // DEFINE CLIENT FOR PACKET TYPE SETTING
     ros::ServiceClient set_packet_type_client = n.serviceClient<gkv_ros_driver::GkvSetPacketType>("gkv_set_packet_type_srv");
     gkv_ros_driver::GkvSetPacketType set_packet_type_srv;
-    set_packet_type_srv.request.packet_type = GKV_SET_DEFAULT_ALGORITHM_PACKET;
+    set_packet_type_srv.request.packet_type = GKV_SELECT_DEFAULT_ALGORITHM_PACKET;
      if (set_packet_type_client.call(set_packet_type_srv))
      {
        ROS_INFO("Packet type changed: %d", (int)set_packet_type_srv.response.result);

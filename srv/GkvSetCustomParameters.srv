@@ -1,0 +1,4 @@
+uint8 quantity_of_params
+uint8[] params
+---
+bool result
