@@ -18,7 +18,7 @@
 
 using namespace std;
 
-uint8_t algorithm = GKV_ORIENTATION_KALMAN_ALGORITHM;
+uint8_t algorithm = GKV_ADC_CODES_ALGORITHM;
 
 void AdcCallback(const gkv_ros_driver::GkvAdcData::ConstPtr& msg);
 

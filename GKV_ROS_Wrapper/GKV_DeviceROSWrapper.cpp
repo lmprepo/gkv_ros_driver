@@ -180,11 +180,11 @@ bool GKV_DeviceROSWrapper::SetCustomParams(gkv_ros_driver::GkvSetCustomParameter
         {
             break;
         }
-        ROS_INFO("Device Custom Parameters Number [%d]",required_custom_parameters.num);
-        for (uint8_t m=0;m<req.quantity_of_params;m++)
-        {
-          ROS_INFO("Device Custom Parameter [%d]",required_custom_parameters.param[m]);
-        }
+//        ROS_INFO("Device Custom Parameters Number [%d]",required_custom_parameters.num);
+//        for (uint8_t m=0;m<req.quantity_of_params;m++)
+//        {
+//          ROS_INFO("Device Custom Parameter [%d]",required_custom_parameters.param[m]);
+//        }
         gkv_->SetCustomPacketParam(&(required_custom_parameters.param[0]), required_custom_parameters.num);
         usleep(10000);
     }
