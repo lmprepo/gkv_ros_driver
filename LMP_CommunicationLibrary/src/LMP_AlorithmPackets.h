@@ -343,8 +343,8 @@ typedef struct __GKV_GpsData
 #pragma pack(push, 1)
 typedef struct __GKV_GpsDataExt
 {
-	float vlat;     							                /*	velocity on latitude	*/
-	float vlon;         						                /*	velocity on longitude	*/
+	double vlat;     							                /*	velocity on latitude	*/
+	double vlon;         						                /*	velocity on longitude	*/
 	float sig_lat;							                    /*	STD of latitude data	*/
 	float sig_lon;						                        /*	STD of longtitude data	*/
 	float sig_alt;							                    /*	STD of altitude data	*/
