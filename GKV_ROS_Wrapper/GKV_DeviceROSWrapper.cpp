@@ -36,7 +36,7 @@
 
 #include "GKV_DeviceROSWrapper.h"
 
-GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string serial_port, uint32_t baudrate)
+GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string serial_port, uint32_t baudrate, uint8_t mode)
 {
     //std::cout << serial_port <<std::endl;
 
@@ -50,6 +50,9 @@ GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string seri
     received_gnss_data_publisher=nh->advertise<gkv_ros_driver::GkvGpsData>("gkv_gnss_data", 10);
     received_ext_gnss_data_publisher=nh->advertise<gkv_ros_driver::GkvExtGpsData>("gkv_ext_gnss_data", 10);
     received_custom_data_publisher=nh->advertise<gkv_ros_driver::GkvCustomData>("gkv_custom_data", 10);
+    received_pose_stamped_publisher=nh->advertise<geometry_msgs::PoseStamped>("gkv_pose_stamped_data", 10);
+
+
 
     ResetService = nh->advertiseService("gkv_reset_srv", &GKV_DeviceROSWrapper::ResetDevice,this);
     SetAlgorithmService = nh->advertiseService("gkv_set_alg_srv", &GKV_DeviceROSWrapper::SetAlgorithm,this);
@@ -66,6 +69,15 @@ GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string seri
     {
         gkv_->SetReceivedPacketCallback(std::bind(&GKV_DeviceROSWrapper::publishReceivedData, this, std::placeholders::_1));
         gkv_->RunDevice();
+        if (mode==GKV_ROS_PACKET_MODE)
+        {
+          if(SetGKVPacketType(GKV_SELECT_CUSTOM_PACKET))
+          {
+            MODE=mode;
+            SetGKVAlgorithm(GKV_ESKF5_NAVIGATON_ALGORITHM);
+            SetGKVFabricCustomParams();
+          }
+        }
     }
 }
 
@@ -111,6 +123,28 @@ bool GKV_DeviceROSWrapper::SetAlgorithm(gkv_ros_driver::GkvSetAlgorithm::Request
     return res.result;
 }
 
+//SET DEVICE ALGORITHM FUNCTION
+bool GKV_DeviceROSWrapper::SetGKVAlgorithm(uint8_t algorithm_number)
+{
+    if ((algorithm_number>9)||(algorithm_number==3))
+    {
+        return false;
+    }
+    SetAlgRequestFlag=true;
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+        if (SetAlgRequestFlag==false)
+        {
+            break;
+        }
+        gkv_->SetAlgorithm(algorithm_number);
+        usleep(10000);
+//            ROS_INFO("Device Set Alg Req [%d]",i);
+    }
+    return (!(SetAlgRequestFlag));
+}
+
+
 //SET DEVICE PACKET TYPE FUNCTION
 bool GKV_DeviceROSWrapper::SetPacketType(gkv_ros_driver::GkvSetPacketType::Request  &req,
                  gkv_ros_driver::GkvSetPacketType::Response &res)
@@ -139,6 +173,34 @@ bool GKV_DeviceROSWrapper::SetPacketType(gkv_ros_driver::GkvSetPacketType::Reque
     }
     res.result=(!(SetPacketTypeRequestFlag));
     return res.result;
+}
+
+//SET DEVICE PACKET TYPE FUNCTION
+bool GKV_DeviceROSWrapper::SetGKVPacketType(uint8_t packet_type)
+{
+    if ((!(packet_type==GKV_SELECT_DEFAULT_ALGORITHM_PACKET))&&(!(packet_type==GKV_SELECT_CUSTOM_PACKET)))
+    {
+        return false;
+    }
+    SetPacketTypeRequestFlag=true;
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+
+        if (SetPacketTypeRequestFlag==false)
+        {
+            break;
+        }
+        if (packet_type==GKV_SELECT_DEFAULT_ALGORITHM_PACKET)
+        {
+          gkv_->SetDefaultAlgorithmPacket();
+        }
+        else {
+          gkv_->SetCustomAlgorithmPacket();
+        }
+        usleep(10000);
+//            ROS_INFO("Device Set Packet Type Req [%d]",i);
+    }
+    return (!(SetPacketTypeRequestFlag));
 }
 
 
@@ -195,6 +257,49 @@ bool GKV_DeviceROSWrapper::SetCustomParams(gkv_ros_driver::GkvSetCustomParameter
         memcpy(&device_custom_parameters,&required_custom_parameters,sizeof(required_custom_parameters));
     }
     return res.result;
+}
+
+
+//SET DEVICE CUSTOM PARAMS FUNCTION
+void GKV_DeviceROSWrapper::SetGKVFabricCustomParams()
+{
+    uint8_t params[]={GKV_STATUS,GKV_SAMPLE_COUNTER,GKV_X,GKV_Y,GKV_Z,GKV_Q1,GKV_Q2,GKV_Q3,GKV_Q0};
+    uint8_t quantity_of_params;
+    quantity_of_params=sizeof(params);
+    //check for maximum quantity of parameters
+    //prepare for request
+    SetCustomParametersRequestFlag=true;
+    //create buffer structure of parameter numbers packet
+    Gyrovert::GKV_CustomDataParam required_custom_parameters;
+    memset(&required_custom_parameters,0,sizeof(required_custom_parameters));
+    //set buffer structure quantity
+    required_custom_parameters.num=quantity_of_params;
+    //set buffer structure numbers
+    for (uint8_t k=0;k<quantity_of_params;k++)
+    {
+        required_custom_parameters.param[k]=params[k];
+    }
+    //send parameters packet
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+        if (SetCustomParametersRequestFlag==false)
+        {
+            break;
+        }
+//        ROS_INFO("Device Custom Parameters Number [%d]",required_custom_parameters.num);
+//        for (uint8_t m=0;m<req.quantity_of_params;m++)
+//        {
+//          ROS_INFO("Device Custom Parameter [%d]",required_custom_parameters.param[m]);
+//        }
+        gkv_->SetCustomPacketParam(&(required_custom_parameters.param[0]), required_custom_parameters.num);
+        usleep(10000);
+    }
+    bool result=(!(SetCustomParametersRequestFlag));
+    //if parameters written correctly set current device parameters to required
+    if (result==true)
+    {
+        memcpy(&device_custom_parameters,&required_custom_parameters,sizeof(required_custom_parameters));
+    }
 }
 
 
@@ -367,39 +472,53 @@ void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
         {
             Gyrovert::GKV_CustomData* packet;
             packet = (Gyrovert::GKV_CustomData*)&buf->data;
-            gkv_ros_driver::GkvCustomData msg;
-            if (CustomParamNumbersReceived)
+            if (MODE==GKV_LMP_PACKET_MODE)
             {
-                msg.quantity_of_params=device_custom_parameters.num;
-                //select parameters that have uint32_t structure
-                for (uint8_t i=0;i<device_custom_parameters.num;i++)
-                {
-                    msg.numbers.push_back(device_custom_parameters.param[i]);
-                    if ((device_custom_parameters.param[i]==GKV_ALG_INT_LAT_NOPH)||
-                        (device_custom_parameters.param[i]==GKV_ALG_INT_LON_NOPH)||
-                        (device_custom_parameters.param[i]==GKV_ALG_INT_ALT_NOPH)||
-                        (device_custom_parameters.param[i]==GKV_UTC_TIME)||
-                        (device_custom_parameters.param[i]==GKV_GNSS_STATUS)||
-                        (device_custom_parameters.param[i]==GKV_ALG_INT_LAT)||
-                        (device_custom_parameters.param[i]==GKV_ALG_INT_LON)||
-                        (device_custom_parameters.param[i]==GKV_GNSS_INT_LAT)||
-                        (device_custom_parameters.param[i]==GKV_GNSS_INT_LON)||
-                        (device_custom_parameters.param[i]==GKV_ALG_STATE_STATUS)||
-                        (device_custom_parameters.param[i]==GKV_GPS_INT_X)||
-                        (device_custom_parameters.param[i]==GKV_GPS_INT_Y)||
-                        (device_custom_parameters.param[i]==GKV_GPS_INT_Z))
-                    {
-                        msg.param_values.push_back(*((int32_t *)&packet->parameter[i]));
-                    }
-                    else {
-                        msg.param_values.push_back(packet->parameter[i]);
-                    }
-                }
-                received_custom_data_publisher.publish(msg);
+              gkv_ros_driver::GkvCustomData msg;
+              if (CustomParamNumbersReceived)
+              {
+                  msg.quantity_of_params=device_custom_parameters.num;
+                  //select parameters that have uint32_t structure
+                  for (uint8_t i=0;i<device_custom_parameters.num;i++)
+                  {
+                      msg.numbers.push_back(device_custom_parameters.param[i]);
+                      if ((device_custom_parameters.param[i]==GKV_ALG_INT_LAT_NOPH)||
+                          (device_custom_parameters.param[i]==GKV_ALG_INT_LON_NOPH)||
+                          (device_custom_parameters.param[i]==GKV_ALG_INT_ALT_NOPH)||
+                          (device_custom_parameters.param[i]==GKV_UTC_TIME)||
+                          (device_custom_parameters.param[i]==GKV_GNSS_STATUS)||
+                          (device_custom_parameters.param[i]==GKV_ALG_INT_LAT)||
+                          (device_custom_parameters.param[i]==GKV_ALG_INT_LON)||
+                          (device_custom_parameters.param[i]==GKV_GNSS_INT_LAT)||
+                          (device_custom_parameters.param[i]==GKV_GNSS_INT_LON)||
+                          (device_custom_parameters.param[i]==GKV_ALG_STATE_STATUS)||
+                          (device_custom_parameters.param[i]==GKV_GPS_INT_X)||
+                          (device_custom_parameters.param[i]==GKV_GPS_INT_Y)||
+                          (device_custom_parameters.param[i]==GKV_GPS_INT_Z))
+                      {
+                          msg.param_values.push_back(*((int32_t *)&packet->parameter[i]));
+                      }
+                      else {
+                          msg.param_values.push_back(packet->parameter[i]);
+                      }
+                  }
+                  received_custom_data_publisher.publish(msg);
+              }
+              else
+              {
+                  gkv_->RequestCustomPacketParams();
+              }
             }
-            else
-            {
-                gkv_->RequestCustomPacketParams();
+            else {
+              geometry_msgs::PoseStamped msg;
+              msg.pose.position.x=packet->parameter[2];
+              msg.pose.position.y=packet->parameter[3];
+              msg.pose.position.z=packet->parameter[4];
+              msg.pose.orientation.x=packet->parameter[5];
+              msg.pose.orientation.x=packet->parameter[6];
+              msg.pose.orientation.z=packet->parameter[7];
+              msg.pose.orientation.w=packet->parameter[8];
+              received_pose_stamped_publisher.publish(msg);
             }
             break;
         }

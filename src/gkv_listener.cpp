@@ -11,6 +11,7 @@
 #include <gkv_ros_driver/GkvReset.h>
 #include <gkv_ros_driver/GkvSetAlgorithm.h>
 #include <gkv_ros_driver/GkvGetID.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <GKV_Device.h>
 
 using namespace std;
@@ -31,6 +32,8 @@ void ExtGNSSCallback(const gkv_ros_driver::GkvExtGpsData::ConstPtr& msg);
 
 void CustomDataCallback(const gkv_ros_driver::GkvCustomData::ConstPtr& msg);
 
+void PoseStampedCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "gkv_listener");
@@ -46,6 +49,7 @@ int main(int argc, char **argv)
   ros::Subscriber sub_gnss = n.subscribe("gkv_gnss_data", 1000, GNSSCallback);
   ros::Subscriber sub_ext_gnss = n.subscribe("gkv_ext_gnss_data", 1000, ExtGNSSCallback);
   ros::Subscriber sub_custom = n.subscribe("gkv_custom_data", 1000, CustomDataCallback);
+  ros::Subscriber sub_pose_stamped = n.subscribe("gkv_pose_stamped_data", 1000, PoseStampedCallback);
   ros::waitForShutdown();
   return 0;
 }
@@ -107,4 +111,11 @@ void CustomDataCallback(const gkv_ros_driver::GkvCustomData::ConstPtr& msg)
         }
     }
     cout << endl;
+}
+
+
+void PoseStampedCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+{
+  ROS_INFO("Pose Stamped Data: x=[%f] y=[%f] z=[%f] q0(w)=[%f] q1(x)=[%f] q2(y)=[%f] q3(z)=[%f]",
+                  msg->pose.position.x, msg->pose.position.y, msg->pose.position.z, msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
 }

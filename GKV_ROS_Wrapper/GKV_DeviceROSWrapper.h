@@ -54,9 +54,15 @@
 #include <gkv_ros_driver/GkvCheckConnection.h>
 #include <gkv_ros_driver/GkvSetPacketType.h>
 #include <gkv_ros_driver/GkvSetCustomParameters.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include "std_msgs/String.h"
 //using namespace ;
+
+#define GKV_LMP_PACKET_MODE 0x01
+#define GKV_ROS_PACKET_MODE 0x02
+
+
 
 class GKV_DeviceROSWrapper
 {
@@ -70,6 +76,7 @@ private:
     ros::Publisher received_gnss_data_publisher;
     ros::Publisher received_ext_gnss_data_publisher;
     ros::Publisher received_custom_data_publisher;
+    ros::Publisher received_pose_stamped_publisher;
 
     ros::ServiceServer ResetService;
     ros::ServiceServer SetAlgorithmService;
@@ -79,7 +86,7 @@ private:
     ros::ServiceServer SetCustomParametersService;
     ros::ServiceServer GetDeviceSettingsService;
 
-
+    uint8_t MODE=0;
     uint8_t GKV_Status=0;
     uint16_t request_limit=100;
     uint8_t custom_params_limit=64;
@@ -99,8 +106,14 @@ private:
 
 
     const char* NoDevStr = "NoDeviceFound";
+
+    bool SetGKVPacketType(uint8_t packet_type);
+
+    void SetGKVFabricCustomParams();
+
+    bool SetGKVAlgorithm(uint8_t algorithm_number);
 public:
-    GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string serial_port, uint32_t baudrate);
+    GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string serial_port, uint32_t baudrate, uint8_t mode = GKV_LMP_PACKET_MODE);
     //RESET DEVICE FUNCTION
     bool ResetDevice(gkv_ros_driver::GkvReset::Request  &req,
                      gkv_ros_driver::GkvReset::Response &res);
