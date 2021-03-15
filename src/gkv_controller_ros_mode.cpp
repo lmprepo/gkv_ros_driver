@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::AsyncSpinner spinner(0);
     spinner.start();
-    GKV_DeviceROSWrapper * gkv= new GKV_DeviceROSWrapper(&nh,com_port,B921600);
+    GKV_DeviceROSWrapper * gkv= new GKV_DeviceROSWrapper(&nh,com_port,B921600, GKV_ROS_PACKET_MODE);
     if (gkv->IsConnected())
     {
         ROS_INFO("GKV driver is now started");
