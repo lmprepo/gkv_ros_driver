@@ -501,10 +501,10 @@ void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
             msg.roll = packet->roll;
             msg.alpha = packet->alfa;
             msg.beta = packet->beta;
-            msg.q3 = packet->q[0];
-            msg.q2 = packet->q[1];
-            msg.q1 = packet->q[2];
-            msg.q0 = packet->q[3];
+            msg.q0 = packet->q[0];
+            msg.q1 = packet->q[1];
+            msg.q2 = packet->q[2];
+            msg.q3 = packet->q[3];
             received_bins_data_publisher.publish(msg);
             break;
         }
