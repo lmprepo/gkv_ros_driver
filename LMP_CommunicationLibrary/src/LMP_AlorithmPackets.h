@@ -237,15 +237,16 @@ typedef struct __GKV_BINSData
   * @}
   */
 
+#pragma pack(push, 1)
 /** 
   * @brief  If GNSS receiver is connected GKV can send packet 0x0E with GNSS data without correction from inertial system   !!!!
   */
 typedef struct __GKV_GpsData
 {
-	float time;								                    /*	Coordinated Universal Time	(UTC)*/
-	float latitude;								                /*	latitude from GNSS	*/
-	float longitude;							                /*	longitude from GNSS	*/
-	float altitude;								                /*	altitude from GNSS	*/
+	uint32_t time;								                    /*	Coordinated Universal Time	(UTC)*/
+	double latitude;								                /*	latitude from GNSS	*/
+	double longitude;							                /*	longitude from GNSS	*/
+	double altitude;								                /*	altitude from GNSS	*/
 	uint32_t state_status;				    	                /*	state of GNSS receiver	*/
 	float TDOP;									                /*	geometry factor of GNSS receiver	*/
 	float HDOP;									                /*	geometry factor of GNSS receiver	*/
@@ -254,6 +255,7 @@ typedef struct __GKV_GpsData
 	float yaw;  								                /*	azimuth angle from GNSS */
 	float alt_velocity;                                         /*	vertical speed */
 }GKV_GpsData;
+#pragma pack(pop)
 
 
 
@@ -337,10 +339,10 @@ typedef struct __GKV_GpsData
   * @}
   */
 
+#pragma pack(push, 1)
 /** 
   * @brief  If GNSS receiver is connected GKV can send packet 0x0F with extended GNSS data          !!!!
   */
-#pragma pack(push, 1)
 typedef struct __GKV_GpsDataExt
 {
 	double vlat;     							                /*	velocity on latitude	*/
@@ -354,12 +356,11 @@ typedef struct __GKV_GpsDataExt
 	uint16_t num_ss;		                                    /*	number of sattelites used in calculation of GNSS data*/
 	uint16_t reserved;
 }GKV_GpsDataExt;
-#pragma pack(pop)
-
 /**
   * @}
   */
+#pragma pack(pop)
 
 
 
-#endif
+#endif

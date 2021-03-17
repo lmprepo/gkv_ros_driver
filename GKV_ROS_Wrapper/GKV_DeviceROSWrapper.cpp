@@ -51,8 +51,8 @@ GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string seri
     received_ext_gnss_data_publisher=nh->advertise<gkv_ros_driver::GkvExtGpsData>("gkv_ext_gnss_data", 10);
     received_custom_data_publisher=nh->advertise<gkv_ros_driver::GkvCustomData>("gkv_custom_data", 10);
     received_pose_stamped_publisher=nh->advertise<geometry_msgs::PoseStamped>("gkv_pose_stamped_data", 10);
-
-
+    received_imu_data_publisher=nh->advertise<sensor_msgs::Imu>("gkv_imu_data", 10);
+    received_nav_sat_fix_publisher=nh->advertise<sensor_msgs::NavSatFix>("gkv_nav_sat_fix_data", 10);
 
     ResetService = nh->advertiseService("gkv_reset_srv", &GKV_DeviceROSWrapper::ResetDevice,this);
     SetAlgorithmService = nh->advertiseService("gkv_set_alg_srv", &GKV_DeviceROSWrapper::SetAlgorithm,this);
@@ -69,14 +69,21 @@ GKV_DeviceROSWrapper::GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string seri
     {
         gkv_->SetReceivedPacketCallback(std::bind(&GKV_DeviceROSWrapper::publishReceivedData, this, std::placeholders::_1));
         gkv_->RunDevice();
+        MODE=mode;
+        SetGKVAlgorithm(GKV_ESKF5_NAVIGATON_ALGORITHM);
         if (mode==GKV_ROS_PACKET_MODE)
         {
           if(SetGKVPacketType(GKV_SELECT_CUSTOM_PACKET))
           {
-            MODE=mode;
-            SetGKVAlgorithm(GKV_ESKF5_NAVIGATON_ALGORITHM);
             SetGKVFabricCustomParams();
+            SetGKVAccelerationUnits(GKV_MS2);
+            SetGKVRateUnits(GKV_RADIANS_PER_SECOND);
+            SetGKVAngleUnits(GKV_DEGREES);
           }
+        }
+        else
+        {
+          SetGKVPacketType(GKV_SELECT_DEFAULT_ALGORITHM_PACKET);
         }
     }
 }
@@ -144,6 +151,68 @@ bool GKV_DeviceROSWrapper::SetGKVAlgorithm(uint8_t algorithm_number)
     return (!(SetAlgRequestFlag));
 }
 
+bool GKV_DeviceROSWrapper::SetGKVAccelerationUnits(uint8_t units)
+{
+    if(units>1)
+    {
+        return false;
+    }
+    SetAccelUnitsRequestFlag=true;
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+        if (SetAccelUnitsRequestFlag==false)
+        {
+            break;
+        }
+        gkv_->SetAccelerationUnits(units);
+;
+        usleep(10000);
+//            ROS_INFO("Device Set Alg Req [%d]",i);
+    }
+    return (!(SetAccelUnitsRequestFlag));
+}
+
+bool GKV_DeviceROSWrapper::SetGKVRateUnits(uint8_t units)
+{
+    if(units>1)
+    {
+        return false;
+    }
+    SetRateUnitsRequestFlag=true;
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+        if (SetRateUnitsRequestFlag==false)
+        {
+            break;
+        }
+        gkv_->SetAngularRateUnits(units);
+;
+        usleep(10000);
+//            ROS_INFO("Device Set Alg Req [%d]",i);
+    }
+    return (!(SetRateUnitsRequestFlag));
+}
+
+bool GKV_DeviceROSWrapper::SetGKVAngleUnits(uint8_t units)
+{
+    if(units>1)
+    {
+        return false;
+    }
+    SetAngleUnitsRequestFlag=true;
+    for (uint8_t i=0;i<request_limit;i++)
+    {
+        if (SetAngleUnitsRequestFlag==false)
+        {
+            break;
+        }
+        gkv_->SetAngleUnits(units);
+;
+        usleep(10000);
+//            ROS_INFO("Device Set Alg Req [%d]",i);
+    }
+    return (!(SetAngleUnitsRequestFlag));
+}
 
 //SET DEVICE PACKET TYPE FUNCTION
 bool GKV_DeviceROSWrapper::SetPacketType(gkv_ros_driver::GkvSetPacketType::Request  &req,
@@ -263,7 +332,16 @@ bool GKV_DeviceROSWrapper::SetCustomParams(gkv_ros_driver::GkvSetCustomParameter
 //SET DEVICE CUSTOM PARAMS FUNCTION
 void GKV_DeviceROSWrapper::SetGKVFabricCustomParams()
 {
-    uint8_t params[]={GKV_STATUS,GKV_SAMPLE_COUNTER,GKV_X,GKV_Y,GKV_Z,GKV_Q1,GKV_Q2,GKV_Q3,GKV_Q0};
+    uint8_t params[]={GKV_STATUS,GKV_SAMPLE_COUNTER,
+                      GKV_X,GKV_Y,GKV_Z,//position
+                      GKV_Q1,GKV_Q2,GKV_Q3,GKV_Q0,//quaternion
+                      GKV_WX,GKV_WY,GKV_WZ,//rate
+                      GKV_AX,GKV_AY,GKV_AZ,//acceleration
+                      GKV_ALG_VAR_PSI,GKV_ALG_VAR_THETA,GKV_ALG_VAR_PHI,//orientation covariance
+                      GKV_ALG_VAR_X,GKV_ALG_VAR_Y,GKV_ALG_VAR_Z,//position covariance
+                      GKV_ALG_INT_LAT,GKV_ALG_INT_LON,GKV_ALG_ALT,// gnss coordinates
+                      GKV_GNSS_STATUS
+                     };
     uint8_t quantity_of_params;
     quantity_of_params=sizeof(params);
     //check for maximum quantity of parameters
@@ -325,7 +403,7 @@ bool GKV_DeviceROSWrapper::GetID(gkv_ros_driver::GkvGetID::Request  &req,
         return true;
     }
     else {
-       RequestDevIDFlag==false;
+       RequestDevIDFlag=false;
        return false;
     }
 }
@@ -510,15 +588,100 @@ void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
               }
             }
             else {
+              //------------------------------------------
               geometry_msgs::PoseStamped msg;
+              //coordinates
               msg.pose.position.x=packet->parameter[2];
               msg.pose.position.y=packet->parameter[3];
               msg.pose.position.z=packet->parameter[4];
+              //quaternion
               msg.pose.orientation.x=packet->parameter[5];
               msg.pose.orientation.x=packet->parameter[6];
               msg.pose.orientation.z=packet->parameter[7];
               msg.pose.orientation.w=packet->parameter[8];
+              //----------------------------------------------
+              sensor_msgs::Imu imu_msg;
+              //quaternion
+              imu_msg.orientation.x=packet->parameter[5];
+              imu_msg.orientation.x=packet->parameter[6];
+              imu_msg.orientation.z=packet->parameter[7];
+              imu_msg.orientation.w=packet->parameter[8];
+              //RATE
+              imu_msg.angular_velocity.x=packet->parameter[9];
+              imu_msg.angular_velocity.y=packet->parameter[10];
+              imu_msg.angular_velocity.z=packet->parameter[11];
+              //ACCELERATION
+              imu_msg.linear_acceleration.x=packet->parameter[12];
+              imu_msg.linear_acceleration.y=packet->parameter[13];
+              imu_msg.linear_acceleration.z=packet->parameter[14];
+              //orientation covariance
+              imu_msg.orientation_covariance[0]=packet->parameter[15];
+              imu_msg.orientation_covariance[1]=0;
+              imu_msg.orientation_covariance[2]=0;
+              imu_msg.orientation_covariance[3]=0;
+              imu_msg.orientation_covariance[4]=packet->parameter[16];
+              imu_msg.orientation_covariance[5]=0;
+              imu_msg.orientation_covariance[6]=0;
+              imu_msg.orientation_covariance[7]=0;
+              imu_msg.orientation_covariance[8]=packet->parameter[17];
+              //RATE covariance
+              imu_msg.angular_velocity_covariance[0]=pow((0.059*pi/180/sqrt(20)),2);
+              imu_msg.angular_velocity_covariance[1]=0;
+              imu_msg.angular_velocity_covariance[2]=0;
+              imu_msg.angular_velocity_covariance[3]=0;
+              imu_msg.angular_velocity_covariance[4]=pow((0.059*pi/180/sqrt(20)),2);
+              imu_msg.angular_velocity_covariance[5]=0;
+              imu_msg.angular_velocity_covariance[6]=0;
+              imu_msg.angular_velocity_covariance[7]=0;
+              imu_msg.angular_velocity_covariance[8]=pow((0.059*pi/180/sqrt(20)),2);
+              //Acceleration covariance
+              imu_msg.linear_acceleration_covariance[0]=pow(((2.4/1000)*9.81/sqrt(20)),2);
+              imu_msg.linear_acceleration_covariance[1]=0;
+              imu_msg.linear_acceleration_covariance[2]=0;
+              imu_msg.linear_acceleration_covariance[3]=0;
+              imu_msg.linear_acceleration_covariance[4]=pow(((2.4/1000)*9.81/sqrt(20)),2);
+              imu_msg.linear_acceleration_covariance[5]=0;
+              imu_msg.linear_acceleration_covariance[6]=0;
+              imu_msg.linear_acceleration_covariance[7]=0;
+              imu_msg.linear_acceleration_covariance[8]=pow(((2.4/1000)*9.81/sqrt(20)),2);
+              //----------------------------------------------
+              sensor_msgs::NavSatFix nav_msg;
+              //position
+              nav_msg.latitude=(*((int32_t *)&(packet->parameter[21])))*(360/(pow(2,32)));
+              nav_msg.longitude=(*((int32_t *)&(packet->parameter[22])))*(360/(pow(2,32)));
+              nav_msg.altitude=packet->parameter[23];
+              nav_msg.position_covariance[0]=packet->parameter[18];
+              nav_msg.position_covariance[1]=0;
+              nav_msg.position_covariance[2]=0;
+              nav_msg.position_covariance[3]=0;
+              nav_msg.position_covariance[4]=packet->parameter[19];
+              nav_msg.position_covariance[5]=0;
+              nav_msg.position_covariance[6]=0;
+              nav_msg.position_covariance[7]=0;
+              nav_msg.position_covariance[8]=packet->parameter[20];
+              GNSS_SolutionFoundFlag=(((*((uint32_t *)&(packet->parameter[24])))>>10)&(3));//2d/3d solution found
+              //GNSS_SolutionFoundFlag=(((*((uint32_t *)&(packet->parameter[24])))>>8));
+              //GNSS_SolutionFoundFlag=(*((uint32_t *)&(packet->parameter[24])));
+//              std::bitset<32> y((*((uint32_t *)&(packet->parameter[24]))));
+//              std::cout << "gnss status " << y << '\n';
+//              ROS_INFO("gnss status [%d]", GNSS_SolutionFoundFlag);
+//              ROS_INFO("length [%d]",buf->preamble);
+
+              if (GNSS_SolutionFoundFlag)
+              {
+                nav_msg.position_covariance_type=nav_msg.COVARIANCE_TYPE_DIAGONAL_KNOWN;
+                nav_msg.status.status=nav_msg.status.STATUS_FIX;
+              }
+              else {
+                nav_msg.position_covariance_type=nav_msg.COVARIANCE_TYPE_UNKNOWN;
+                nav_msg.status.status=nav_msg.status.STATUS_NO_FIX;
+              }
+              nav_msg.status.service=(nav_msg.status.SERVICE_COMPASS|nav_msg.status.SERVICE_GALILEO|nav_msg.status.SERVICE_GLONASS|nav_msg.status.SERVICE_GPS);//all services gps, glonass, galileo
+
               received_pose_stamped_publisher.publish(msg);
+              received_imu_data_publisher.publish(imu_msg);
+              received_nav_sat_fix_publisher.publish(nav_msg);
+
             }
             break;
         }
@@ -555,6 +718,18 @@ void GKV_DeviceROSWrapper::publishReceivedData(Gyrovert::GKV_PacketBase * buf)
             {
                 SetCustomParametersRequestFlag=false;
 //                    ROS_INFO("Custom parameters set");
+            }
+            if (SetAccelUnitsRequestFlag)
+            {
+              SetAccelUnitsRequestFlag=false;
+            }
+            if (SetAngleUnitsRequestFlag)
+            {
+              SetAngleUnitsRequestFlag=false;
+            }
+            if (SetRateUnitsRequestFlag)
+            {
+              SetRateUnitsRequestFlag=false;
             }
             break;
         }

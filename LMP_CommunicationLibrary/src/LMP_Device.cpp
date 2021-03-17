@@ -326,6 +326,75 @@ namespace Gyrovert
         Send_Data();
     }
 
+    /**
+      * @name	SetAccelerationUnits
+      * @brief  Function configures and sends Settings Packet (type=0x07) with selected units of linear acceleration.
+      * @retval no return value.
+      */
+    void LMP_Device::SetAccelerationUnits(uint8_t units)
+    {
+      GKV_Settings GKV_Settings;
+      memset(&GKV_Settings, 0, sizeof(GKV_Settings));
+      uint8_t type = GKV_DEV_SETTINGS_PACKET;
+      if (units==GKV_MS2)
+      {
+        GKV_Settings.mode = GKV_MS2_ACCEL_MODE;
+      }
+      else {
+        GKV_Settings.mode = GKV_G_ACCEL_MODE;
+
+      }
+      GKV_Settings.mode_mask = GKV_ALLOW_CHANGE_ACCEL_MODE;
+      Configure_Output_Packet(type, &GKV_Settings, sizeof(GKV_Settings));
+      Send_Data();
+    }
+
+
+    /**
+      * @name	SetAngularRateUnits
+      * @brief  Function configures and sends Settings Packet (type=0x07) with selected units of angular velocity.
+      * @retval no return value.
+      */
+    void LMP_Device::SetAngularRateUnits(uint8_t units)
+    {
+      GKV_Settings GKV_Settings;
+      memset(&GKV_Settings, 0, sizeof(GKV_Settings));
+      uint8_t type = GKV_DEV_SETTINGS_PACKET;
+      if (units==GKV_DEGREES_PER_SECOND)
+      {
+        GKV_Settings.mode = GKV_DEGREES_RATE_MODE;
+      }
+      else {
+        GKV_Settings.mode = GKV_RADIANS_RATE_MODE;
+
+      }
+      GKV_Settings.mode_mask = GKV_ALLOW_CHANGE_RATE_MODE;
+      Configure_Output_Packet(type, &GKV_Settings, sizeof(GKV_Settings));
+      Send_Data();
+    }
+
+    /**
+      * @name	SetAngleUnits
+      * @brief  Function configures and sends Settings Packet (type=0x07) with selected units of angular velocity.
+      * @retval no return value.
+      */
+    void LMP_Device::SetAngleUnits(uint8_t units)
+    {
+      GKV_Settings GKV_Settings;
+      memset(&GKV_Settings, 0, sizeof(GKV_Settings));
+      uint8_t type = GKV_DEV_SETTINGS_PACKET;
+      if (units==GKV_DEGREES)
+      {
+        GKV_Settings.mode = GKV_DEGREES_ANGLE_MODE;
+      }
+      else
+      {
+        GKV_Settings.mode = GKV_RADIANS_ANGLE_MODE;
+      }
+      GKV_Settings.mode_mask = GKV_ALLOW_CHANGE_ANGLE_MODE;
+      Configure_Output_Packet(type, &GKV_Settings, sizeof(GKV_Settings));
+      Send_Data();
+    }
 
     /**
       * @name	SetCustomPacketParam

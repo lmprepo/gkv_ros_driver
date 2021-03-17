@@ -59,6 +59,7 @@ typedef struct __GKV_CustomData
 }GKV_CustomData;
 
 
+#define GKV_CUSTOM_PACKET_PARAMS_QUANTITY                                   0X6D
 /** @defgroup CUSTOM_PACKET_PARAMETERS
   * @brief 		LIST OF PARAMETER CODES FOR CUSTOM RESPONSE PACKET
   * @{
@@ -241,38 +242,38 @@ typedef struct __GKV_AllParameters
     float    LAZ;																				/*	linear acceleration z	*/
     float    AZIMUTH; 												    						/*	azimuth angle (when using GNSS)	*/
     uint32_t UTC_TIME;												    						/*	Coordinated Universal Time (when using GNSS)	*/
-    float    LAT;																		/*	latitude (when using GNSS)	*/
-    float    LON;																		/*	longitude (when using GNSS)	*/
-    float    ALT;																		/*	altitude (when using GNSS)	*/
+    float    LAT;                                                                               /*	latitude (when using GNSS)	*/
+    float    LON;                                                                               /*	longitude (when using GNSS)	*/
+    float    ALT;                                                                               /*	altitude (when using GNSS)	*/
     uint32_t GNSS_STATUS;											        					/*	state of GNSS receiver	*/
-    float    GNSS_TDOP;											        					/*	geometry factor of GNSS receiver	*/
-    float    GNSS_HDOP;											        					/*	geometry factor of GNSS receiver	*/
-    float    GNSS_VDOP;											        					/*	geometry factor of GNSS receiver	*/
-    float    GNSS_VEL;											    						/*	horizontal velocity calculated using GNSS	*/
-    float    GNSS_YAW;											    						/*	yaw angle calculated using GNSS	*/
+    float    GNSS_TDOP;                                                                         /*	geometry factor of GNSS receiver	*/
+    float    GNSS_HDOP;                                                                         /*	geometry factor of GNSS receiver	*/
+    float    GNSS_VDOP;                                                                         /*	geometry factor of GNSS receiver	*/
+    float    GNSS_VEL;                                                                          /*	horizontal velocity calculated using GNSS	*/
+    float    GNSS_YAW;                                                                          /*	yaw angle calculated using GNSS	*/
     float    GNSS_ALT_VEL;										        						/*	verical velocity calculated using GNSS	*/
     float    GNSS_SAT_NUM;										            					/*	number of sattelites using to calculate GNSS parameters	*/
-    float    MX;																	/*	magnetometer data x	*/
-    float    MY;																	/*	magnetometer data y	*/
-    float    MZ;																	/*	magnetometer data z	*/
-    float    GNSS_LAT_VEL;										        					/*	velocity on latitude (using GNSS)	*/
-    float    GNSS_LON_VEL;										        					/*	velocity on longitude (using GNSS)	*/
-    float    GNSS_SIG_LAT;										        					/*	STD of latitude data	*/
-    float    GNSS_SIG_LON;										        					/*	STD of longitude data	*/
-    float    GNSS_SIG_ALT;									        						/*	STD of altitude data	*/
-    float    GNSS_SIG_VLAT;									            					/*	STD of velocity on latitude	*/
-    float    GNSS_SIG_VLON;									            					/*	STD of velocity on longitude	*/
-    float    GNSS_SIG_VALT;									            					/*	STD of velocity on altitude	*/
-    uint32_t ALG_INT_LAT;										        					/*	latitude, calculated by BINS in codes (to convert into radians multiply 2*pi/(2^32))	*/
-    uint32_t ALG_INT_LON;										        					/*	longitude, calculated by BINS in codes (to convert into radians multiply 2*pi/(2^32))	*/
-    float    ALG_ALT;											    					/*	altitude, calculated by BINS in float32	*/
-    uint32_t GNSS_INT_LAT;										        					/*	latitude from GNSS in codes (to convert into radians multiply 2*pi/(2^32))	*/
-    uint32_t GNSS_INT_LON;										        					/*	longitude from GNSS in codes (to convert into radians multiply 2*pi/(2^32))	*/
-    uint32_t GNSS_INT_ALT;										        					/*	altitude from GNSS in codes (to convert into radians multiply 2*pi/(2^32))	*/
-    float    BAROMETER_ADC;										        					/*	Barometer data in codes	*/
-    float    ALG_VAR_X;											    					/*	variance of position error of X axis in m2	*/
-    float    ALG_VAR_Y;											    					/*	variance of position error of Y axis in m2	*/
-    float    ALG_VAR_Z;											    					/*	variance of position error of Z axis in m2	*/
+    float    MX;                                                                                /*	magnetometer data x	*/
+    float    MY;                                                                                /*	magnetometer data y	*/
+    float    MZ;                                                                                /*	magnetometer data z	*/
+    float    GNSS_LAT_VEL;                                                                      /*	velocity on latitude (using GNSS)	*/
+    float    GNSS_LON_VEL;                                                                      /*	velocity on longitude (using GNSS)	*/
+    float    GNSS_SIG_LAT;                                                                      /*	STD of latitude data	*/
+    float    GNSS_SIG_LON;                                                                      /*	STD of longitude data	*/
+    float    GNSS_SIG_ALT;                                                                      /*	STD of altitude data	*/
+    float    GNSS_SIG_VLAT;                                                                     /*	STD of velocity on latitude	*/
+    float    GNSS_SIG_VLON;                                                                     /*	STD of velocity on longitude	*/
+    float    GNSS_SIG_VALT;                                                                     /*	STD of velocity on altitude	*/
+    uint32_t ALG_INT_LAT;                                                                       /*	latitude, calculated by BINS in codes (to convert into radians multiply 2*pi/(2^32))	*/
+    uint32_t ALG_INT_LON;                                                                       /*	longitude, calculated by BINS in codes (to convert into radians multiply 2*pi/(2^32))	*/
+    float    ALG_ALT;                                                                           /*	altitude, calculated by BINS in float32	*/
+    uint32_t GNSS_INT_LAT;                                                                      /*	latitude from GNSS in codes (to convert into radians multiply 2*pi/(2^32))	*/
+    uint32_t GNSS_INT_LON;                                                                      /*	longitude from GNSS in codes (to convert into radians multiply 2*pi/(2^32))	*/
+    uint32_t ALG_STATE_STATUS;										        					/*	altitude from GNSS in codes (to convert into radians multiply 2*pi/(2^32))	*/
+    float    BAROMETER_ADC;                                                                     /*	Barometer data in codes	*/
+    float    ALG_VAR_X;                                                                         /*	variance of position error of X axis in m2	*/
+    float    ALG_VAR_Y;                                                                         /*	variance of position error of Y axis in m2	*/
+    float    ALG_VAR_Z;                                                                         /*	variance of position error of Z axis in m2	*/
     float    ALG_VAR_VX;										        					/*	variance of velocity error of X axis in (m/s)^2	*/
     float    ALG_VAR_VY;										        					/*	variance of velocity error of Y axis in (m/s)^2	*/
     float    ALG_VAR_VZ;										        					/*	variance of velocity error of Z axis in (m/s)^2	*/
@@ -287,13 +288,11 @@ typedef struct __GKV_AllParameters
 /** 
   * @brief  Packet 0x27 with list of parameters of custom packet (send/receive) 
   */
-#pragma pack(push, 1)
 typedef struct __GKV_CustomDataParam
 {
 	uint8_t num;                            /*	number of parameters that device sends in custom packet	*/
 	uint8_t param[63];                      /*	type of parameter N from list of 'custom_data_parameters'	*/
 }GKV_CustomDataParam;
-#pragma pack(pop)
 
 
 

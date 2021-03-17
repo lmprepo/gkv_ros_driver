@@ -28,10 +28,10 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
   ros::AsyncSpinner spinner(0);
   spinner.start();
-  // DEFINE SUBSCRIBER FOR DATA PACKET
+  //DEFINE SUBSCRIBER FOR DATA PACKET
   ros::Subscriber sub_custom = n.subscribe("gkv_custom_data", 1000, CustomDataCallback);
 
-  // DEFINE CLIENT FOR CHECK CONNECTION SERVICE
+  //DEFINE CLIENT FOR CHECK CONNECTION SERVICE
   ros::ServiceClient check_connection_client = n.serviceClient<gkv_ros_driver::GkvCheckConnection>("gkv_check_connection_srv");
   gkv_ros_driver::GkvCheckConnection check_connection_srv;
    if (check_connection_client.call(check_connection_srv))

@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    GKV_Device.h
   * @author  Alex Galkin,  <info@mp-lab.ru>
-  * @brief   GKV-10 class module that inherits LMP_Device class and includes functions
-  * for data transmitting and receiving using standard serial libraries for Linux
+  * @brief   GKV-10 class module that inherits LMP_Device class and includes functions 
+  * for data transmitting and receiving using standard serial libraries for Linux 
   * and Windows. Added in library since 1.1 version
   *
   ******************************************************************************
@@ -44,7 +44,6 @@ namespace Gyrovert
 {
 #define GKV_SELECT_DEFAULT_ALGORITHM_PACKET 0
 #define GKV_SELECT_CUSTOM_PACKET 1
-
 // windows class for GKV serial port comm
 #ifdef _WIN32
 #include <windows.h>

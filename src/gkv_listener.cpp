@@ -12,6 +12,8 @@
 #include <gkv_ros_driver/GkvSetAlgorithm.h>
 #include <gkv_ros_driver/GkvGetID.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/NavSatFix.h>
 #include <GKV_Device.h>
 
 using namespace std;
@@ -34,6 +36,12 @@ void CustomDataCallback(const gkv_ros_driver::GkvCustomData::ConstPtr& msg);
 
 void PoseStampedCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
 
+void RosImuCallback(const sensor_msgs::Imu::ConstPtr& msg);
+
+void RosNavSatCallback(const sensor_msgs::NavSatFix::ConstPtr& msg);
+
+
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "gkv_listener");
@@ -50,6 +58,9 @@ int main(int argc, char **argv)
   ros::Subscriber sub_ext_gnss = n.subscribe("gkv_ext_gnss_data", 1000, ExtGNSSCallback);
   ros::Subscriber sub_custom = n.subscribe("gkv_custom_data", 1000, CustomDataCallback);
   ros::Subscriber sub_pose_stamped = n.subscribe("gkv_pose_stamped_data", 1000, PoseStampedCallback);
+  ros::Subscriber sub_imu = n.subscribe("gkv_imu_data", 1000, RosImuCallback);
+  ros::Subscriber sub_nav = n.subscribe("gkv_nav_sat_fix_data", 1000, RosNavSatCallback);
+
   ros::waitForShutdown();
   return 0;
 }
@@ -118,4 +129,19 @@ void PoseStampedCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
   ROS_INFO("Pose Stamped Data: x=[%f] y=[%f] z=[%f] q0(w)=[%f] q1(x)=[%f] q2(y)=[%f] q3(z)=[%f]",
                   msg->pose.position.x, msg->pose.position.y, msg->pose.position.z, msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
+}
+
+
+void RosImuCallback(const sensor_msgs::Imu::ConstPtr& msg)
+{
+  ROS_INFO("IMU Data: ax=[%f] ay=[%f] az=[%f] wx=[%f] wy=[%f] wz=[%f] q0(w)=[%f] q1(x)=[%f] q2(y)=[%f] q3(z)=[%f]",
+                  msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z, msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z, msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z);
+}
+
+
+void RosNavSatCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
+{
+  ROS_INFO("Navigation Data: lat=[%f] lon=[%f] alt=[%f]",
+                  msg->latitude, msg->longitude, msg->altitude);
+
 }

@@ -55,13 +55,16 @@
 #include <gkv_ros_driver/GkvSetPacketType.h>
 #include <gkv_ros_driver/GkvSetCustomParameters.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <bitset>
 
 #include "std_msgs/String.h"
 //using namespace ;
 
 #define GKV_LMP_PACKET_MODE 0x01
 #define GKV_ROS_PACKET_MODE 0x02
-
+#define pi 3.141592
 
 
 class GKV_DeviceROSWrapper
@@ -77,6 +80,9 @@ private:
     ros::Publisher received_ext_gnss_data_publisher;
     ros::Publisher received_custom_data_publisher;
     ros::Publisher received_pose_stamped_publisher;
+    ros::Publisher received_imu_data_publisher;
+    ros::Publisher received_nav_sat_fix_publisher;
+
 
     ros::ServiceServer ResetService;
     ros::ServiceServer SetAlgorithmService;
@@ -102,9 +108,11 @@ private:
     bool CheckConnectionRequestFlag=false;
     bool SetPacketTypeRequestFlag=false;
     bool SetCustomParametersRequestFlag=false;
+    bool SetAccelUnitsRequestFlag=false;
+    bool SetRateUnitsRequestFlag=false;
+    bool SetAngleUnitsRequestFlag=false;
 
-
-
+    uint32_t GNSS_SolutionFoundFlag=0;
     const char* NoDevStr = "NoDeviceFound";
 
     bool SetGKVPacketType(uint8_t packet_type);
@@ -112,6 +120,13 @@ private:
     void SetGKVFabricCustomParams();
 
     bool SetGKVAlgorithm(uint8_t algorithm_number);
+
+    bool SetGKVAccelerationUnits(uint8_t units);
+
+    bool SetGKVRateUnits(uint8_t units);
+
+    bool SetGKVAngleUnits(uint8_t units);
+
 public:
     GKV_DeviceROSWrapper(ros::NodeHandle *nh, std::string serial_port, uint32_t baudrate, uint8_t mode = GKV_LMP_PACKET_MODE);
     //RESET DEVICE FUNCTION
