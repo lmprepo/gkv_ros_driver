@@ -168,12 +168,19 @@
 
 
 ---------------------------------------------
-При выборе режима GKV_ROS_PACKET_MODE вместо GKV_LMP_PACKET_MODE  устройство выдает сообщения в стандартном формате  сообщений ROS:
+При выборе режима GKV_ROS_PACKET_MODE вместо GKV_LMP_PACKET_MODE  устройство выдает сообщения в стандартном формате сообщений ROS:
 
 Сообщение:geometry_msgs/PoseStamped
 
 Топик: gkv_pose_stamped_data
 
+Сообщение:sensor_msgs/Imu
+
+Топик: gkv_imu_data
+
+Сообщение:sensor_msgs/NavSatFix
+
+Топик: gkv_nav_sat_fix_data
 
 ---------------------------------------------
 Сервисы: 
