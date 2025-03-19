@@ -9,7 +9,7 @@ add_library(GKV_ROS_WrapperLibrary
 
 target_link_libraries(GKV_ROS_WrapperLibrary 
 			PUBLIC ${catkin_LIBRARIES} 
-			PRIVATE GKV_DevCommunicationLibrary)
+			PRIVATE LMP_CommunicationLibrary)
 
 target_include_directories(GKV_ROS_WrapperLibrary PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
